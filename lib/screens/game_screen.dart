@@ -13,6 +13,7 @@ import '../utils/responsive.dart';
 import 'category_screen.dart';
 import 'finished_screen.dart';
 import 'game_over_screen.dart';
+import 'menu_screen.dart';
 import 'player_info_screen.dart';
 import 'round_intro_screen.dart';
 import 'splash_screen.dart';
@@ -135,6 +136,12 @@ class _GameScreenState extends State<GameScreen>
         _playerAge = saved.age;
       }
     });
+  }
+
+  Future<void> _openMenu() async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MenuScreen()));
+    // Muat ulang data pemain — nama/usia/negara bisa saja baru diubah lewat menu.
+    await _bootstrap();
   }
 
   void _leaveSplash() {
@@ -618,6 +625,7 @@ class _GameScreenState extends State<GameScreen>
           playerName: _playerName,
           playerAge: _playerAge,
           onStart: _startGame,
+          onOpenMenu: _openMenu,
         );
       case GamePhase.category:
         return CategoryScreen(onSelect: _selectCategory);

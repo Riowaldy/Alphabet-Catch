@@ -9,12 +9,14 @@ class StartScreen extends StatelessWidget {
   final String playerName;
   final int playerAge;
   final VoidCallback onStart;
+  final VoidCallback onOpenMenu;
 
   const StartScreen({
     super.key,
     required this.playerName,
     required this.playerAge,
     required this.onStart,
+    required this.onOpenMenu,
   });
 
   @override
@@ -24,6 +26,7 @@ class StartScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Align(alignment: Alignment.topRight, child: _menuButton(scale)),
           Text('🍎🔤🍇', style: TextStyle(fontSize: 40 * scale)),
           const SizedBox(height: 6),
           Text(
@@ -58,4 +61,19 @@ class StartScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _menuButton(double scale) => GestureDetector(
+        onTap: onOpenMenu,
+        child: Container(
+          width: 36 * scale,
+          height: 36 * scale,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: Color(0x26000000), offset: Offset(0, 4))],
+          ),
+          alignment: Alignment.center,
+          child: Icon(Icons.menu_rounded, size: 20 * scale, color: AppColors.plum),
+        ),
+      );
 }

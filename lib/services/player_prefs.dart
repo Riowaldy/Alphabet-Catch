@@ -1,11 +1,17 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/countries.dart';
 
-/// Nama & usia pemain yang tersimpan dari sesi sebelumnya.
+/// Nama, usia, & negara pemain yang tersimpan dari sesi sebelumnya.
 class SavedPlayer {
   final String name;
   final int age;
+  final String country;
 
-  const SavedPlayer({required this.name, required this.age});
+  const SavedPlayer({
+    required this.name,
+    required this.age,
+    this.country = kDefaultCountry,
+  });
 }
 
 /// Menyimpan identitas pemain & skor tertinggi secara lokal, supaya
@@ -16,6 +22,7 @@ class PlayerPrefs {
 
   static const _keyName = 'player_name';
   static const _keyAge = 'player_age';
+  static const _keyCountry = 'player_country';
   static const _keyHighScore = 'high_score';
 
   static Future<SavedPlayer?> loadPlayer() async {
@@ -23,13 +30,19 @@ class PlayerPrefs {
     final name = prefs.getString(_keyName);
     final age = prefs.getInt(_keyAge);
     if (name == null || name.isEmpty || age == null) return null;
-    return SavedPlayer(name: name, age: age);
+    final country = prefs.getString(_keyCountry) ?? kDefaultCountry;
+    return SavedPlayer(name: name, age: age, country: country);
   }
 
-  static Future<void> savePlayer(String name, int age) async {
+  static Future<void> savePlayer(
+    String name,
+    int age, {
+    String country = kDefaultCountry,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyName, name);
     await prefs.setInt(_keyAge, age);
+    await prefs.setString(_keyCountry, country);
   }
 
   static Future<int> loadHighScore() async {
