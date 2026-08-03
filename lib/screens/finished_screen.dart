@@ -11,6 +11,7 @@ class FinishedScreen extends StatelessWidget {
   final int highScore;
   final bool isNewHighScore;
   final VoidCallback onChooseAgain;
+  final VoidCallback onBackToStart;
 
   const FinishedScreen({
     super.key,
@@ -19,6 +20,7 @@ class FinishedScreen extends StatelessWidget {
     this.highScore = 0,
     this.isNewHighScore = false,
     required this.onChooseAgain,
+    required this.onBackToStart,
   });
 
   @override
@@ -50,7 +52,7 @@ class FinishedScreen extends StatelessWidget {
                       : 'Skor akhir kamu: ',
                 ),
                 TextSpan(text: '$score', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
-                const TextSpan(text: '. Mau coba tema lain?'),
+                const TextSpan(text: '. Sampai jumpa lagi!'),
               ],
             ),
           ),
@@ -66,7 +68,8 @@ class FinishedScreen extends StatelessWidget {
               style: GoogleFonts.baloo2(fontSize: 16 * scale, fontWeight: FontWeight.w800, color: AppColors.success),
             ),
           ],
-          BigButton(label: 'Pilih Tema Lain', onTap: onChooseAgain),
+          BigButton(label: 'Selesai', onTap: onBackToStart),
+          BigButton(label: 'Main Tema Lain', onTap: onChooseAgain, secondary: true),
         ],
       ),
     );

@@ -270,6 +270,17 @@ class _GameScreenState extends State<GameScreen>
     });
   }
 
+  /// Benar-benar mengakhiri sesi: kembali ke layar utama, bukan
+  /// memaksa pemain memilih tema baru lagi.
+  void _backToStart() {
+    setState(() {
+      _score = 0;
+      _lives = 3;
+      _round = 0;
+      _phase = GamePhase.start;
+    });
+  }
+
   void _retry() {
     setState(() {
       _score = 0;
@@ -637,6 +648,7 @@ class _GameScreenState extends State<GameScreen>
           highScore: _highScore,
           isNewHighScore: _isNewHighScore,
           onChooseAgain: _chooseAgain,
+          onBackToStart: _backToStart,
         );
     }
   }
