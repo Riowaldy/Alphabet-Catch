@@ -8,12 +8,16 @@ import '../widgets/game_panel.dart';
 class FinishedScreen extends StatelessWidget {
   final String playerName;
   final int score;
+  final int highScore;
+  final bool isNewHighScore;
   final VoidCallback onChooseAgain;
 
   const FinishedScreen({
     super.key,
     required this.playerName,
     required this.score,
+    this.highScore = 0,
+    this.isNewHighScore = false,
     required this.onChooseAgain,
   });
 
@@ -50,6 +54,18 @@ class FinishedScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 6),
+          Text(
+            '🏆 Skor tertinggi: $highScore',
+            style: GoogleFonts.fredoka(fontSize: 14 * scale, fontWeight: FontWeight.w600, color: AppColors.coralDark),
+          ),
+          if (isNewHighScore) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Rekor baru! 🎉',
+              style: GoogleFonts.baloo2(fontSize: 16 * scale, fontWeight: FontWeight.w800, color: AppColors.success),
+            ),
+          ],
           BigButton(label: 'Pilih Tema Lain', onTap: onChooseAgain),
         ],
       ),

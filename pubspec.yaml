@@ -11,11 +11,39 @@ dependencies:
     sdk: flutter
   google_fonts: ^6.2.1
   cupertino_icons: ^1.0.6
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/
+    - assets/splash/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+    background_color: "#7EC8F2"
+    theme_color: "#FF6B6B"
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#7EC8F2"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#7EC8F2"
+  image: assets/splash/splash_logo.png
+  android_12:
+    color: "#7EC8F2"
+    image: assets/splash/splash_logo.png
+  web: true
+  android: true
+  ios: true

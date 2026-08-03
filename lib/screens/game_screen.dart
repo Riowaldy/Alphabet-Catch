@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../data/categories.dart';
 import '../models/game_item.dart';
+import '../services/player_prefs.dart';
 import '../theme/app_colors.dart';
 import '../utils/responsive.dart';
 import 'category_screen.dart';
@@ -14,11 +15,13 @@ import 'finished_screen.dart';
 import 'game_over_screen.dart';
 import 'player_info_screen.dart';
 import 'round_intro_screen.dart';
+import 'splash_screen.dart';
 import 'start_screen.dart';
 import 'vocab_screen.dart';
 import 'win_screen.dart';
 
 enum GamePhase {
+  splash,
   playerInfo,
   start,
   category,
@@ -75,10 +78,12 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen>
     with SingleTickerProviderStateMixin {
-  GamePhase _phase = GamePhase.playerInfo;
+  GamePhase _phase = GamePhase.splash;
 
   String _playerName = '';
   int _playerAge = 0;
+  int _highScore = 0;
+  bool _isNewHighScore = false;
 
   int _score = 0;
   int _lives = 3;
@@ -116,6 +121,26 @@ class _GameScreenState extends State<GameScreen>
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick);
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    final saved = await PlayerPrefs.loadPlayer();
+    final highScore = await PlayerPrefs.loadHighScore();
+    if (!mounted) return;
+    setState(() {
+      _highScore = highScore;
+      if (saved != null) {
+        _playerName = saved.name;
+        _playerAge = saved.age;
+      }
+    });
+  }
+
+  void _leaveSplash() {
+    setState(() {
+      _phase = _playerName.isNotEmpty ? GamePhase.start : GamePhase.playerInfo;
+    });
   }
 
   @override
@@ -133,6 +158,7 @@ class _GameScreenState extends State<GameScreen>
       _playerAge = age;
       _phase = GamePhase.start;
     });
+    PlayerPrefs.savePlayer(name, age);
   }
 
   void _startGame() {
@@ -185,7 +211,55 @@ class _GameScreenState extends State<GameScreen>
     _startRound();
   }
 
-  void _finishGame() => setState(() => _phase = GamePhase.finished);
+  /// Mengakhiri permainan dari titik manapun (menang ronde, kalah, atau
+  /// diselesaikan langsung saat bermain), menyimpan skor tertinggi bila
+  /// pecah rekor, lalu menampilkan layar "Selesai".
+  Future<void> _endGame() async {
+    _spawnTimer?.cancel();
+    _ticker.stop();
+    final isNewHighScore = await PlayerPrefs.saveHighScoreIfHigher(_score);
+    if (!mounted) return;
+    setState(() {
+      _items.clear();
+      _isNewHighScore = isNewHighScore;
+      if (isNewHighScore) _highScore = _score;
+      _phase = GamePhase.finished;
+    });
+  }
+
+  Future<void> _confirmFinishDuringPlay() async {
+    _ticker.stop();
+    _spawnTimer?.cancel();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Selesai main?', style: GoogleFonts.baloo2(fontWeight: FontWeight.w800, color: AppColors.plum)),
+        content: Text(
+          'Skor kamu saat ini ($_score) akan disimpan.',
+          style: GoogleFonts.fredoka(color: AppColors.ink),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Lanjut Main', style: GoogleFonts.fredoka(color: AppColors.subtitle)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Selesai', style: GoogleFonts.fredoka(fontWeight: FontWeight.w700, color: AppColors.coralDark)),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (confirmed == true) {
+      await _endGame();
+    } else if (_phase == GamePhase.playing) {
+      _spawnLoop();
+      _ticker.start();
+    }
+  }
 
   void _chooseAgain() {
     setState(() {
@@ -410,10 +484,7 @@ class _GameScreenState extends State<GameScreen>
         Positioned(
           left: obj.x,
           top: obj.y,
-          child: GestureDetector(
-            onTap: () => _tryCatch(obj),
-            child: Text(obj.item.emoji, style: TextStyle(fontSize: 52 * s)),
-          ),
+          child: Text(obj.item.emoji, style: TextStyle(fontSize: 52 * s)),
         ),
 
       // Floating feedback text
@@ -449,6 +520,27 @@ class _GameScreenState extends State<GameScreen>
         right: 16,
         child: _pill('❤️' * max(_lives, 0) + '🖤' * (3 - max(_lives, 0))),
       ),
+
+      // Tombol selesaikan permainan (hanya aktif saat benar-benar bermain)
+      if (_phase == GamePhase.playing)
+        Positioned(
+          top: 62 * s,
+          right: 16,
+          child: GestureDetector(
+            onTap: _confirmFinishDuringPlay,
+            child: Container(
+              width: 40 * s,
+              height: 40 * s,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: Color(0x26000000), offset: Offset(0, 6))],
+              ),
+              alignment: Alignment.center,
+              child: Text('🏁', style: TextStyle(fontSize: 18 * s)),
+            ),
+          ),
+        ),
 
       // Letter badge
       Positioned(
@@ -506,6 +598,8 @@ class _GameScreenState extends State<GameScreen>
 
   Widget _buildOverlay() {
     switch (_phase) {
+      case GamePhase.splash:
+        return SplashScreen(onFinished: _leaveSplash);
       case GamePhase.playerInfo:
         return PlayerInfoScreen(onSubmit: _submitPlayerInfo);
       case GamePhase.start:
@@ -528,13 +622,20 @@ class _GameScreenState extends State<GameScreen>
       case GamePhase.playing:
         return const SizedBox.shrink();
       case GamePhase.roundWon:
-        return WinScreen(score: _score, onNextRound: _nextRound, onFinish: _finishGame);
+        return WinScreen(score: _score, onNextRound: _nextRound, onFinish: _endGame);
       case GamePhase.gameOver:
-        return GameOverScreen(score: _score, onRetry: _retry);
+        return GameOverScreen(
+          score: _score,
+          highScore: _highScore,
+          onRetry: _retry,
+          onFinish: _endGame,
+        );
       case GamePhase.finished:
         return FinishedScreen(
           playerName: _playerName,
           score: _score,
+          highScore: _highScore,
+          isNewHighScore: _isNewHighScore,
           onChooseAgain: _chooseAgain,
         );
     }

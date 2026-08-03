@@ -7,9 +7,17 @@ import '../widgets/game_panel.dart';
 
 class GameOverScreen extends StatelessWidget {
   final int score;
+  final int highScore;
   final VoidCallback onRetry;
+  final VoidCallback onFinish;
 
-  const GameOverScreen({super.key, required this.score, required this.onRetry});
+  const GameOverScreen({
+    super.key,
+    required this.score,
+    this.highScore = 0,
+    required this.onRetry,
+    required this.onFinish,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +46,13 @@ class GameOverScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 4),
+          Text(
+            '🏆 Skor tertinggi: $highScore',
+            style: GoogleFonts.fredoka(fontSize: 14 * scale, fontWeight: FontWeight.w600, color: AppColors.coralDark),
+          ),
           BigButton(label: 'Main Lagi', onTap: onRetry),
+          BigButton(label: 'Selesai', onTap: onFinish, secondary: true),
         ],
       ),
     );
