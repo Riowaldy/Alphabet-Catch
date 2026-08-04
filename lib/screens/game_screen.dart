@@ -627,7 +627,12 @@ class _GameScreenState extends State<GameScreen>
       case GamePhase.playing:
         return const SizedBox.shrink();
       case GamePhase.roundWon:
-        return WinScreen(score: _score, onNextRound: _nextRound, onFinish: _endGame);
+        return WinScreen(
+          score: _score,
+          targetCount: _targetCount,
+          onNextRound: _nextRound,
+          onFinish: _endGame,
+        );
       case GamePhase.gameOver:
         return GameOverScreen(
           score: _score,
