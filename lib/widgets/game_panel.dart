@@ -7,8 +7,14 @@ import '../utils/responsive.dart';
 class GamePanel extends StatelessWidget {
   final Widget child;
   final double maxWidth;
+  final bool scrim;
 
-  const GamePanel({super.key, required this.child, this.maxWidth = 340});
+  const GamePanel({
+    super.key,
+    required this.child,
+    this.maxWidth = 340,
+    this.scrim = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,7 @@ class GamePanel extends StatelessWidget {
     final effectiveMaxWidth = maxWidth * context.uiScale;
 
     return Container(
-      color: Colors.black.withOpacity(0.55),
+      color: scrim ? Colors.black.withOpacity(0.55) : Colors.transparent,
       alignment: Alignment.center,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: effectiveMaxWidth),
@@ -30,8 +36,9 @@ class GamePanel extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFFEFE9FB), width: 4),
               boxShadow: const [
-                BoxShadow(color: Color(0x33000000), offset: Offset(0, 12)),
+                BoxShadow(color: Color(0x33000000), offset: Offset(0, 14)),
               ],
             ),
             child: child,

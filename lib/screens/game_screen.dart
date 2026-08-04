@@ -6,20 +6,23 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../data/categories.dart';
+import '../data/countries.dart';
 import '../models/game_item.dart';
 import '../services/player_prefs.dart';
 import '../theme/app_colors.dart';
 import '../utils/responsive.dart';
+import 'about_screen.dart';
 import 'category_screen.dart';
 import 'finished_screen.dart';
 import 'game_over_screen.dart';
-import 'menu_screen.dart';
 import 'player_info_screen.dart';
 import 'round_intro_screen.dart';
 import 'splash_screen.dart';
 import 'start_screen.dart';
+import 'update_profile_screen.dart';
 import 'vocab_screen.dart';
 import 'win_screen.dart';
+import '../widgets/sky_decorations.dart';
 
 enum GamePhase {
   splash,
@@ -83,6 +86,7 @@ class _GameScreenState extends State<GameScreen>
 
   String _playerName = '';
   int _playerAge = 0;
+  String _playerCountry = kDefaultCountry;
   int _highScore = 0;
   bool _isNewHighScore = false;
 
@@ -134,14 +138,19 @@ class _GameScreenState extends State<GameScreen>
       if (saved != null) {
         _playerName = saved.name;
         _playerAge = saved.age;
+        _playerCountry = saved.country;
       }
     });
   }
 
-  Future<void> _openMenu() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MenuScreen()));
-    // Muat ulang data pemain — nama/usia/negara bisa saja baru diubah lewat menu.
+  Future<void> _openProfile() async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UpdateProfileScreen()));
+    // Muat ulang data pemain — nama/usia/negara bisa saja baru diubah.
     await _bootstrap();
+  }
+
+  Future<void> _openAbout() async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AboutScreen()));
   }
 
   void _leaveSplash() {
@@ -443,7 +452,7 @@ class _GameScreenState extends State<GameScreen>
               decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
               child: Stack(
                 children: [
-                  ..._buildDecorations(),
+                  const Positioned.fill(child: SkyDecorations()),
                   if (_showGameplayLayer) ..._buildGameplayLayer(),
                   _buildOverlay(),
                 ],
@@ -454,45 +463,6 @@ class _GameScreenState extends State<GameScreen>
       ),
     );
   }
-
-  List<Widget> _buildDecorations() {
-    return [
-      Positioned(
-        top: 24,
-        right: 24,
-        child: Container(
-          width: 70,
-          height: 70,
-          decoration: BoxDecoration(
-            color: AppColors.sun,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(color: AppColors.sun.withOpacity(0.35), blurRadius: 0, spreadRadius: 8),
-            ],
-          ),
-        ),
-      ),
-      Positioned(
-        top: 60,
-        left: _screenW * 0.08,
-        child: _cloud(70, 26),
-      ),
-      Positioned(
-        top: 140,
-        left: _screenW * 0.65,
-        child: _cloud(90, 30),
-      ),
-    ];
-  }
-
-  Widget _cloud(double w, double h) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(50),
-        ),
-      );
 
   List<Widget> _buildGameplayLayer() {
     final s = _uiScale;
@@ -624,8 +594,11 @@ class _GameScreenState extends State<GameScreen>
         return StartScreen(
           playerName: _playerName,
           playerAge: _playerAge,
+          playerCountry: _playerCountry,
+          highScore: _highScore,
           onStart: _startGame,
-          onOpenMenu: _openMenu,
+          onOpenProfile: _openProfile,
+          onOpenAbout: _openAbout,
         );
       case GamePhase.category:
         return CategoryScreen(onSelect: _selectCategory);
