@@ -453,7 +453,7 @@ class _GameScreenState extends State<GameScreen>
           _screenH = constraints.maxHeight;
           _uiScale = context.uiScale;
           return GestureDetector(
-            onPanStart: _phase == GamePhase.playing
+            onPanDown: _phase == GamePhase.playing
                 ? (d) => _updateBasketX(d.localPosition.dx)
                 : null,
             onPanUpdate: _phase == GamePhase.playing

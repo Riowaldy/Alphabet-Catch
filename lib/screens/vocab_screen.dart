@@ -6,6 +6,14 @@ import '../utils/responsive.dart';
 import '../widgets/big_button.dart';
 import '../widgets/game_panel.dart';
 
+/// Palet aksen yang dirotasi antar kartu kosakata (border & lencana huruf).
+const List<Color> _kVocabAccents = [
+  AppColors.coral,
+  AppColors.plum,
+  Color(0xFFC98A00),
+  AppColors.grass,
+];
+
 class VocabScreen extends StatelessWidget {
   final GameCategory category;
   final VoidCallback onNext;
@@ -28,8 +36,8 @@ class VocabScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(category.icon, style: TextStyle(fontSize: 40 * scale)),
-          const SizedBox(height: 4),
+          _LogoBadge(icon: category.icon, scale: scale),
+          const SizedBox(height: 8),
           Text(
             'Kenalan Dulu Yuk!',
             style: GoogleFonts.baloo2(
@@ -65,7 +73,11 @@ class VocabScreen extends StatelessWidget {
                 crossAxisSpacing: 10,
                 childAspectRatio: 0.72,
               ),
-              itemBuilder: (context, i) => _VocabCard(item: sorted[i], scale: scale),
+              itemBuilder: (context, i) => _VocabCard(
+                item: sorted[i],
+                accent: _kVocabAccents[i % _kVocabAccents.length],
+                scale: scale,
+              ),
             ),
           ),
           BigButton(label: 'Lanjut', onTap: onNext),
@@ -75,48 +87,93 @@ class VocabScreen extends StatelessWidget {
   }
 }
 
-class _VocabCard extends StatelessWidget {
-  final GameItem item;
+/// Lencana bulat bergradasi khas maskot, dipakai sebagai ikon layar ini.
+class _LogoBadge extends StatelessWidget {
+  final String icon;
   final double scale;
 
-  const _VocabCard({required this.item, required this.scale});
+  const _LogoBadge({required this.icon, required this.scale});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = 58 * scale;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.sun, AppColors.coral],
+        ),
+        boxShadow: [
+          BoxShadow(color: AppColors.coral.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 5)),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(icon, style: TextStyle(fontSize: 26 * scale)),
+    );
+  }
+}
+
+class _VocabCard extends StatelessWidget {
+  final GameItem item;
+  final Color accent;
+  final double scale;
+
+  const _VocabCard({required this.item, required this.accent, required this.scale});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      padding: EdgeInsets.symmetric(vertical: 8 * scale, horizontal: 4 * scale),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6F4FB),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: accent.withOpacity(0.15), offset: const Offset(0, 3), blurRadius: 4),
+        ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Text(item.emoji, style: TextStyle(fontSize: 32 * scale)),
-          const SizedBox(height: 4),
-          Text(
-            item.name,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.fredoka(
-              fontSize: 11 * scale,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
+          Positioned.fill(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(item.emoji, style: TextStyle(fontSize: 32 * scale)),
+                SizedBox(height: 6 * scale),
+                Text(
+                  item.name,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.fredoka(
+                    fontSize: 11 * scale,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Container(
-            width: 18 * scale,
-            height: 18 * scale,
-            decoration: const BoxDecoration(color: AppColors.plum, shape: BoxShape.circle),
-            alignment: Alignment.center,
-            child: Text(
-              item.letter,
-              style: GoogleFonts.baloo2(
-                fontSize: 10 * scale,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
+          Positioned(
+            top: -6 * scale,
+            right: -6 * scale,
+            child: Container(
+              width: 18 * scale,
+              height: 18 * scale,
+              decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: Text(
+                item.letter,
+                style: GoogleFonts.baloo2(
+                  fontSize: 10 * scale,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
