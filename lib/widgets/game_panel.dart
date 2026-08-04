@@ -8,12 +8,16 @@ class GamePanel extends StatelessWidget {
   final Widget child;
   final double maxWidth;
   final bool scrim;
+  final Gradient? gradient;
+  final Color? borderColor;
 
   const GamePanel({
     super.key,
     required this.child,
     this.maxWidth = 340,
     this.scrim = true,
+    this.gradient,
+    this.borderColor,
   });
 
   @override
@@ -34,9 +38,10 @@ class GamePanel extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.fromLTRB(28, 32, 28, 24),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: gradient == null ? AppColors.card : null,
+              gradient: gradient,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFFEFE9FB), width: 4),
+              border: Border.all(color: borderColor ?? const Color(0xFFEFE9FB), width: 4),
               boxShadow: const [
                 BoxShadow(color: Color(0x33000000), offset: Offset(0, 14)),
               ],

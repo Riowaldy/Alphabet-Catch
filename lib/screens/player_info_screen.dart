@@ -17,9 +17,6 @@ class PlayerInfoScreen extends StatefulWidget {
 }
 
 class _PlayerInfoScreenState extends State<PlayerInfoScreen> {
-  static const _fieldFill = Color(0xFFF1EEFB);
-  static const _tipFill = Color(0xFFFFF6D8);
-
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   String? _errorText;
@@ -36,7 +33,7 @@ class _PlayerInfoScreenState extends State<PlayerInfoScreen> {
     final age = int.tryParse(_ageController.text.trim());
 
     if (name.isEmpty) {
-      setState(() => _errorText = 'Nama tidak boleh kosong ya!');
+      setState(() => _errorText = 'Nama tidak boleh kosong!');
       return;
     }
     if (age == null || age < 1 || age > 99) {
@@ -53,13 +50,19 @@ class _PlayerInfoScreenState extends State<PlayerInfoScreen> {
     final scale = context.uiScale;
     return GamePanel(
       scrim: false,
+      borderColor: Colors.white,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFFFFF1DE), Color(0xFFFCE3F0), Color(0xFFE8E1FC)],
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('👋😊', style: TextStyle(fontSize: 44 * scale)),
-          const SizedBox(height: 6),
+          // _EmojiBadge(scale: scale),
+          const SizedBox(height: 12),
           Text(
-            'Siapa Namamu?',
+            'Selamat Datang',
             style: GoogleFonts.baloo2(
               fontSize: 26 * scale,
               fontWeight: FontWeight.w800,
@@ -76,8 +79,9 @@ class _PlayerInfoScreenState extends State<PlayerInfoScreen> {
           _LabeledField(
             icon: Icons.person_rounded,
             label: 'Nama',
-            hint: 'Ketik nama kamu...',
-            fill: _fieldFill,
+            hint: 'Masukkan nama',
+            accent: AppColors.coral,
+            fill: const Color(0xFFFFF0F0),
             scale: scale,
             controller: _nameController,
             textCapitalization: TextCapitalization.words,
@@ -86,8 +90,9 @@ class _PlayerInfoScreenState extends State<PlayerInfoScreen> {
           _LabeledField(
             icon: Icons.cake_rounded,
             label: 'Usia',
-            hint: 'Ketik usia kamu...',
-            fill: _fieldFill,
+            hint: 'Masukkan usia',
+            accent: AppColors.plum,
+            fill: const Color(0xFFF3EFFF),
             scale: scale,
             controller: _ageController,
             keyboardType: TextInputType.number,
@@ -106,13 +111,40 @@ class _PlayerInfoScreenState extends State<PlayerInfoScreen> {
           const SizedBox(height: 14),
           _DotsIndicator(scale: scale),
           const SizedBox(height: 16),
-          _TipBox(
-            fill: _tipFill,
-            scale: scale,
-            text: 'Kamu bisa menggunakan nama panggilan\natau nama asli, lho! 😊',
-          ),
+          // _TipBox(
+          //   scale: scale,
+          //   text: 'Kamu bisa menggunakan nama panggilan\natau nama asli, lho! 😊',
+          // ),
         ],
       ),
+    );
+  }
+}
+
+class _EmojiBadge extends StatelessWidget {
+  final double scale;
+
+  const _EmojiBadge({required this.scale});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = 74 * scale;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.sun, AppColors.coral],
+        ),
+        boxShadow: [
+          BoxShadow(color: AppColors.coral.withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 6)),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text('😊', style: TextStyle(fontSize: 34 * scale)),
     );
   }
 }
@@ -121,6 +153,7 @@ class _LabeledField extends StatelessWidget {
   final IconData icon;
   final String label;
   final String hint;
+  final Color accent;
   final Color fill;
   final double scale;
   final TextEditingController controller;
@@ -132,6 +165,7 @@ class _LabeledField extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.hint,
+    required this.accent,
     required this.fill,
     required this.scale,
     required this.controller,
@@ -143,15 +177,22 @@ class _LabeledField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: fill,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: accent.withOpacity(0.35), width: 1.5),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.plum, size: 22 * scale),
-          const SizedBox(width: 10),
+          Container(
+            width: 34 * scale,
+            height: 34 * scale,
+            decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: Icon(icon, color: Colors.white, size: 19 * scale),
+          ),
+          SizedBox(width: 10 * scale),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,7 +203,7 @@ class _LabeledField extends StatelessWidget {
                   style: GoogleFonts.baloo2(
                     fontSize: 13 * scale,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.plum,
+                    color: accent,
                   ),
                 ),
                 TextField(
@@ -217,7 +258,7 @@ class _GradientNextButtonState extends State<_GradientNextButton> {
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.plum, AppColors.plumDark],
+            colors: [AppColors.coral, AppColors.plum],
           ),
           borderRadius: BorderRadius.circular(999),
           boxShadow: [
@@ -255,6 +296,8 @@ class _DotsIndicator extends StatelessWidget {
 
   const _DotsIndicator({required this.scale});
 
+  static const _colors = [AppColors.coral, AppColors.sun, AppColors.plum];
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -266,7 +309,7 @@ class _DotsIndicator extends StatelessWidget {
           width: (active ? 20 : 6) * scale,
           height: 6 * scale,
           decoration: BoxDecoration(
-            color: active ? AppColors.plum : AppColors.plum.withOpacity(0.25),
+            color: active ? _colors[i] : _colors[i].withOpacity(0.3),
             borderRadius: BorderRadius.circular(999),
           ),
         );
@@ -276,18 +319,17 @@ class _DotsIndicator extends StatelessWidget {
 }
 
 class _TipBox extends StatelessWidget {
-  final Color fill;
   final double scale;
   final String text;
 
-  const _TipBox({required this.fill, required this.scale, required this.text});
+  const _TipBox({required this.scale, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: fill,
+        color: const Color(0xFFFFF6D8),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(

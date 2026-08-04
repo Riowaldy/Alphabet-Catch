@@ -144,7 +144,20 @@ class _GameScreenState extends State<GameScreen>
   }
 
   Future<void> _openProfile() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UpdateProfileScreen()));
+    final accountDeleted = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const UpdateProfileScreen()),
+    );
+    if (!mounted) return;
+    if (accountDeleted == true) {
+      setState(() {
+        _playerName = '';
+        _playerAge = 0;
+        _playerCountry = kDefaultCountry;
+        _highScore = 0;
+        _phase = GamePhase.playerInfo;
+      });
+      return;
+    }
     // Muat ulang data pemain — nama/usia/negara bisa saja baru diubah.
     await _bootstrap();
   }

@@ -59,4 +59,14 @@ class PlayerPrefs {
     await prefs.setInt(_keyHighScore, score);
     return true;
   }
+
+  /// Menghapus seluruh data akun pemain (nama, usia, negara, & skor
+  /// tertinggi) yang tersimpan secara lokal.
+  static Future<void> clearPlayer() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyName);
+    await prefs.remove(_keyAge);
+    await prefs.remove(_keyCountry);
+    await prefs.remove(_keyHighScore);
+  }
 }
